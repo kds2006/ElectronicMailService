@@ -45,14 +45,29 @@ bool EMailAccount::has_spam(EMailMessage const& msg) const {
 	return false;
 }
 
+vector<string> calc_xor(vector<string> const& susp_words, byte code) {
+	vector<string> coded_susp_words = susp_words;
+	for (auto& pattern : coded_susp_words) {
+		for_each(pattern.begin(), pattern.end(), [code](string::value_type& c) { 
+			c = static_cast<string::value_type>(static_cast<byte>(c) ^ code); });
+	}
+	return coded_susp_words;
+}
+
 bool EMailAccount::is_suspicious(EMailMessage const& msg) const {
-	static vector<string> susp_words = {
-		"suspicious"
+	static vector<string> patterns = {
+		"\xb1\xb2\xb3"
 	};
-	auto body = msg.body;
-	for_each(body.begin(), body.end(), [](auto& c) { c = tolower(c); });
-	for (const auto& w : susp_words) {
-		if (string::npos != body.find(w)) return true;
+	static vector<string> patterns_42 = calc_xor(patterns, static_cast<byte>(0x42));
+	static vector<string> patterns_e1 = calc_xor(patterns, static_cast<byte>(0xe1));
+	for (const auto& w : patterns) {
+		if (string::npos != msg.body.find(w)) return true;
+	}
+	for (const auto& w : patterns_42) {
+		if (string::npos != msg.body.find(w)) return true;
+	}
+	for (const auto& w : patterns_e1) {
+		if (string::npos != msg.body.find(w)) return true;
 	}
 	return false;
 }

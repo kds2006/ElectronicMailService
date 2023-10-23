@@ -75,7 +75,9 @@ TEST_F(EMailAccountTest, SuspiciousMessage) {
     auto secdep_suspicious_qty = secdep_acc->sec_dep_suspicious_qty;
     auto secdep_log_qty = secdep_acc->log_qty;
 
-    bob_acc->send({ bob_acc->Addr, alice_acc->Addr, "suspicious!" }).wait();
+    bob_acc->send({ bob_acc->Addr, alice_acc->Addr, "\xb1\xb2\xb3" }).wait();
+    // bob_acc->send({ bob_acc->Addr, alice_acc->Addr, "\x50\x53\x52" }).wait();
+    
     EXPECT_EQ(bob_send_qty + 1, bob_acc->send_qty);
 
     while (alice_acc->get_job_size()) { this_thread::yield(); }
